@@ -1,19 +1,33 @@
 import os
+from dotenv import load_dotenv
 from telegram.ext import *
 
-API_KEY = ''
+load_dotenv()
+
+
+def start_command(update, context):
+    update.message.reply_text('Hello there! I\'m a bot. What\'s up?')
+
+
+def help_command(update, context):
+    update.message.reply_text('Try typing anything and I will do my best to respond!')
+
+
+def custom_command(update, context):
+    update.message.reply_text('This is a custom command, you can add whatever text you want here.')
 
 
 class MovingAverageBot:
-    def __init__(self, img):
+    def __init__(self, img, symbol):
         self.img = img
-        updater = Updater(API_KEY, use_context=True)
+        self.symbol = symbol
+        updater = Updater(os.getenv('API_KEY'), use_context=True)
         dp = updater.dispatcher
 
         # Commands
-        dp.add_handler(CommandHandler('start', self.start_command))
-        dp.add_handler(CommandHandler('help', self.help_command))
-        dp.add_handler(CommandHandler('custom', self.custom_command))
+        dp.add_handler(CommandHandler('start', start_command))
+        dp.add_handler(CommandHandler('help', help_command))
+        dp.add_handler(CommandHandler('custom', custom_command))
 
         # Messages
         dp.add_handler(MessageHandler(Filters.text, self.send_stock_photo))
@@ -22,22 +36,18 @@ class MovingAverageBot:
         updater.start_polling()
         updater.idle()
 
-    def start_command(self, update, context):
-        update.message.reply_text('Hello there! I\'m a bot. What\'s up?')
-
-    def help_command(self, update, context):
-        update.message.reply_text('Try typing anything and I will do my best to respond!')
-
-    def custom_command(self, update, context):
-        update.message.reply_text('This is a custom command, you can add whatever text you want here.')
-
     def send_stock_photo(self, update, context):
-        context.bot.sendPhoto(chat_id=update.effective_chat.id, photo=self.img, caption='STOCK')
+        text = str(update.message.text).lower()
+        print(update.message.chat.id)
+
+        # Bot response
+
+        update.message.reply_text('response')
+        context.bot.sendPhoto(chat_id=update.effective_chat.id, photo=self.img, caption=self.symbol)
 
         print("response sent !!")
 
 
-# Run the programme
 if __name__ == '__main__':
     IMG = open('IEX.png', 'rb')
-    bot = MovingAverageBot(IMG)
+    bot = MovingAverageBot(img=IMG, symbol='ABC')
